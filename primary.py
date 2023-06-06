@@ -34,7 +34,7 @@ start = time.time()
 
 encoding = int(input())
 if encoding >= 32:
-  Exception("No can do")
+  Exception('Too high a number asshole, pick sth else you bozo')
 print(encoding)
 
 binary = ''
@@ -151,10 +151,10 @@ def Colorreading():
     
       
     # if green>12000 and blue>12000 and red>12000:
-    if green + blue + red >= 75000:
+    if green + blue + red >= 95000:
       return "white"
     #elif green <7000 and blue < 7000 and red < 7000:
-    elif green + blue + red <= 38000:
+    elif green + blue + red <= 36000:
       return "black"
     else:
       print("Color readings are different from described color, let it pass through")
