@@ -24,30 +24,17 @@ S2 = 5
 S3 = 6
 OUT = 18
 
-#set GPIO pins as output
+#set GPIO pins for the color sensor as output
 GPIO.setup(S2, GPIO.OUT)
 GPIO.setup(S3, GPIO.OUT)
 
-#set GPIO pins as input
+#set GPIO pins for the color sensor as input
 GPIO.setup(OUT, GPIO.IN)
 
 #set global values
 start = time.time()
 
-encoding = int(input())
-if encoding >= 32:
-  Exception('Too high a number asshole, pick sth else you bozo')
-print(encoding)
-
-binary = ''
-while encoding//2 != 0:
-  binary = str(encoding%2) + binary
-  encoding = encoding//2
-
-binary = str(encoding%2) + binary
-print(binary)
-exitcode = None
-binary_index = len(binary)-1
+# initialize functions
 
 def ultrasoundcheck():
     range_mm = sensor.range
@@ -113,55 +100,70 @@ def NextNumber():
 
 def Colorreading():
   temp = 1
+  while(1):  
+    NUM_CYCLES = 10
+    GPIO.output(S2,GPIO.LOW)
+    GPIO.output(S3,GPIO.LOW)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(OUT, GPIO.FALLING)
+    duration = time.time() - start 
+    red  = NUM_CYCLES / duration   
+   
+    GPIO.output(S2,GPIO.LOW)
+    GPIO.output(S3,GPIO.HIGH)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(OUT, GPIO.FALLING)
+    duration = time.time() - start
+    blue = NUM_CYCLES / duration
+    
 
-  NUM_CYCLES = 10
-  GPIO.output(S2,GPIO.LOW)
-  GPIO.output(S3,GPIO.LOW)
-  time.sleep(0.3)
-  start = time.time()
-  for impulse_count in range(NUM_CYCLES):
-    GPIO.wait_for_edge(OUT, GPIO.FALLING)
-  duration = time.time() - start 
-  red  = NUM_CYCLES / duration   
+    GPIO.output(S2,GPIO.HIGH)
+    GPIO.output(S3,GPIO.HIGH)
+    time.sleep(0.3)
+    start = time.time()
+    for impulse_count in range(NUM_CYCLES):
+      GPIO.wait_for_edge(OUT, GPIO.FALLING)
+    duration = time.time() - start
+    green = NUM_CYCLES / duration
+    
+      
+    # if green>12000 and blue>12000 and red>12000:
+    if green + blue + red >= 95000:
+      return "white"
+    #elif green <7000 and blue < 7000 and red < 7000:
+    elif green + blue + red <= 36000:
+      return "black"
+    else:
+      print("Color readings are different from described color, let it pass through")
+      return "neither black nor white"
+    
 
-  GPIO.output(S2,GPIO.LOW)
-  GPIO.output(S3,GPIO.HIGH)
-  time.sleep(0.3)
-  start = time.time()
-  for impulse_count in range(NUM_CYCLES):
-    GPIO.wait_for_edge(OUT, GPIO.FALLING)
-  duration = time.time() - start
-  blue = NUM_CYCLES / duration
+encoding = int(input())
+if encoding >= 32:
+  Exception('Too high a number asshole, pick sth else you bozo')
+print(encoding)
 
+binary = ''
+while encoding//2 != 0:
+  binary = str(encoding%2) + binary
+  encoding = encoding//2
 
-  GPIO.output(S2,GPIO.HIGH)
-  GPIO.output(S3,GPIO.HIGH)
-  time.sleep(0.3)
-  start = time.time()
-  for impulse_count in range(NUM_CYCLES):
-    GPIO.wait_for_edge(OUT, GPIO.FALLING)
-  duration = time.time() - start
-  green = NUM_CYCLES / duration
-
-
-  # if green>12000 and blue>12000 and red>12000:
-  if green + blue + red >= 95000:
-    return "white"
-  #elif green <7000 and blue < 7000 and red < 7000:
-  elif green + blue + red <= 36000:
-    return "black"
-  else:
-    print("Color readings are different from described color, let it pass through")
-    return "neither black nor white"
+binary = str(encoding%2) + binary
+print(binary)
+exitcode = None
+binary_index = len(binary)-1
 
 while exitcode == None:
+  # if nothing is detected for more than 30 sec
   if (time.time() - start) >= 30:
     exitcode = 'Belt broken, commencing shutdown'
   else:
     ultrasoundcheck()
 
-except KeyboardInterrupt:
-  GPIO.cleanup()
 GPIO.cleanup()
 print(exitcode)
 quit()
