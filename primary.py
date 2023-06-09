@@ -113,46 +113,46 @@ def NextNumber():
 
 def Colorreading():
   temp = 1
-  while(1):  
-    NUM_CYCLES = 10
-    GPIO.output(S2,GPIO.LOW)
-    GPIO.output(S3,GPIO.LOW)
-    time.sleep(0.3)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start 
-    red  = NUM_CYCLES / duration   
-   
-    GPIO.output(S2,GPIO.LOW)
-    GPIO.output(S3,GPIO.HIGH)
-    time.sleep(0.3)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start
-    blue = NUM_CYCLES / duration
-    
 
-    GPIO.output(S2,GPIO.HIGH)
-    GPIO.output(S3,GPIO.HIGH)
-    time.sleep(0.3)
-    start = time.time()
-    for impulse_count in range(NUM_CYCLES):
-      GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start
-    green = NUM_CYCLES / duration
-    
-      
-    # if green>12000 and blue>12000 and red>12000:
-    if green + blue + red >= 95000:
-      return "white"
-    #elif green <7000 and blue < 7000 and red < 7000:
-    elif green + blue + red <= 36000:
-      return "black"
-    else:
-      print("Color readings are different from described color, let it pass through")
-      return "neither black nor white"
+  NUM_CYCLES = 10
+  GPIO.output(S2,GPIO.LOW)
+  GPIO.output(S3,GPIO.LOW)
+  time.sleep(0.3)
+  start = time.time()
+  for impulse_count in range(NUM_CYCLES):
+    GPIO.wait_for_edge(OUT, GPIO.FALLING)
+  duration = time.time() - start 
+  red  = NUM_CYCLES / duration   
+
+  GPIO.output(S2,GPIO.LOW)
+  GPIO.output(S3,GPIO.HIGH)
+  time.sleep(0.3)
+  start = time.time()
+  for impulse_count in range(NUM_CYCLES):
+    GPIO.wait_for_edge(OUT, GPIO.FALLING)
+  duration = time.time() - start
+  blue = NUM_CYCLES / duration
+
+
+  GPIO.output(S2,GPIO.HIGH)
+  GPIO.output(S3,GPIO.HIGH)
+  time.sleep(0.3)
+  start = time.time()
+  for impulse_count in range(NUM_CYCLES):
+    GPIO.wait_for_edge(OUT, GPIO.FALLING)
+  duration = time.time() - start
+  green = NUM_CYCLES / duration
+
+
+  # if green>12000 and blue>12000 and red>12000:
+  if green + blue + red >= 95000:
+    return "white"
+  #elif green <7000 and blue < 7000 and red < 7000:
+  elif green + blue + red <= 36000:
+    return "black"
+  else:
+    print("Color readings are different from described color, let it pass through")
+    return "neither black nor white"
 
 while exitcode == None:
   if (time.time() - start) >= 30:
@@ -160,6 +160,8 @@ while exitcode == None:
   else:
     ultrasoundcheck()
 
+except KeyboardInterrupt:
+  GPIO.cleanup()
 GPIO.cleanup()
 print(exitcode)
 quit()
