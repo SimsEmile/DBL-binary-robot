@@ -20,9 +20,9 @@ Motor1 = {'EN': 25, 'input1': 24, 'input2': 23} #motor 1 is used for the windmil
 Motor2 = {'EN': 11, 'input1': 9, 'input2': 10} #motor 2 is used for the belt, will be removed once not in use anymore
 
 #set GPIO pin numbers for the color sensor
-S2 = 5
-S3 = 6
-OUT = 18
+S2 = 16
+S3 = 20
+OUT = 21
 
 #set GPIO pins for the color sensor as output
 GPIO.setup(S2, GPIO.OUT)
@@ -39,14 +39,12 @@ start = time.time()
 def ultrasoundcheck():
     range_mm = sensor.range
     print("Range: {0}mm".format(range_mm))
-    if range_mm == 0:
+    if range_mm <= 4:
       first_time = time.time()
       while range_mm == 0:
         range_mm = sensor.range
         if time.time() - first_time > 3:
-          range_mm = 1
-          time.sleep(20)
-          if sensor.range == 0:
+          if sensor.range == range_mm:
             print("belt is potentially stuck, or factory has tried to sabotage me too much, initiating shutdown")
       time.sleep(2.5)
       color = ColorReading()
@@ -82,7 +80,7 @@ def Arm():
 
   GPIO.output(Motor2['input1'], GPIO.HIGH)
   GPIO.output(Motor2['input2'], GPIO.LOW)
-  time.sleep(5)
+  time.sleep(10)
     
   print("Stop motors")
   EN1.ChangeDutyCycle(0)
@@ -94,48 +92,53 @@ def Arm():
 def NextNumber():
   if binary_index != 0:
     binary_index -= 1
+    start = time.time()
   else:
     exitcode = 'The binary encoding is finished'
     quit()
-
-def Colorreading():
-  temp = 1
-  while(1):  
+def red(): 
     NUM_CYCLES = 10
     GPIO.output(S2,GPIO.LOW)
     GPIO.output(S3,GPIO.LOW)
     time.sleep(0.3)
-    start = time.time()
+    start_impulse = time.time()
     for impulse_count in range(NUM_CYCLES):
       GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start 
-    red  = NUM_CYCLES / duration   
-   
+    duration = time.time() - start_impulse 
+    red  = NUM_CYCLES / duration
+    return blue
+
+def blue():
     GPIO.output(S2,GPIO.LOW)
     GPIO.output(S3,GPIO.HIGH)
     time.sleep(0.3)
-    start = time.time()
+    start_impulse = time.time()
     for impulse_count in range(NUM_CYCLES):
       GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start
+    duration = time.time() - start_impulse
     blue = NUM_CYCLES / duration
+    return blue
     
-
+def green():
     GPIO.output(S2,GPIO.HIGH)
     GPIO.output(S3,GPIO.HIGH)
     time.sleep(0.3)
-    start = time.time()
+    start_impulse = time.time()
     for impulse_count in range(NUM_CYCLES):
       GPIO.wait_for_edge(OUT, GPIO.FALLING)
-    duration = time.time() - start
+    duration = time.time() - start_impulse
     green = NUM_CYCLES / duration
-    
+    return blue
       
     # if green>12000 and blue>12000 and red>12000:
-    if green + blue + red >= 95000:
+def Colorreading():
+    red = red()
+    blue = blue()
+    green = green()
+    if green + blue + red >= 35000:
       return "white"
     #elif green <7000 and blue < 7000 and red < 7000:
-    elif green + blue + red <= 36000:
+    elif green + blue + red <= 15000:
       return "black"
     else:
       print("Color readings are different from described color, let it pass through")
