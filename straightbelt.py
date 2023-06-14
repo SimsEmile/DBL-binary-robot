@@ -47,7 +47,7 @@ def BLACK(): #black threshold, using the Blue(), Red() and Green() functions, an
    blue = 0
    red = 0
    green = 0
-   print("preparing for black color test, press y to start, or no to shutdown")
+   print("preparing for black color test, press y to start, anything else to shutdown")
    blacktest = input()
    if blacktest == "y":
       for loop in range(10):
@@ -65,7 +65,7 @@ def BLACK(): #black threshold, using the Blue(), Red() and Green() functions, an
    return Black_Color
 
 def WHITE(): #white threshold, taking the average and reducing by certain amount to avoid lower values being ignored, works the same as the BLACK function
-   print("are ya ready for the white disk test now?")
+   print("Ready for white disk, press y to continue, anything else to shutdown")
    whitetest = input()
    if whitetest == "y":
       blue1 = 0
@@ -83,13 +83,13 @@ def WHITE(): #white threshold, taking the average and reducing by certain amount
 
 def ultrasoundcheck(): #check if a shape which is sufficiently high to be recognized as a disk, which gets analyzed as well
     range_mm = sensor.range #checks distance of the highest object (belt or other) from the TOF2 sensor
-    print("Range: {0}mm".format(range_mm)) 
+    #print("Range: {0}mm".format(range_mm)) 
     if range_mm <= 30: #range at which the disk will be detected
       first_time = time.time() #this is to check for if something longer than the disk is on the belt, so we ignore it
       while range_mm <= 20: #while the disk is under it, and also to check once the disk should be gone through
         range_mm = sensor.range
         if time.time() - first_time > 3: #if this is True, there is an issue, the disk should've gone through
-          print("hello")
+          #print("hello")
           time.sleep(20) #sleep for 20 seconds, to let the wrong disk through
           if sensor.range == range_mm: #if the range is the same, we can assume that the belt can have an issue, if the range is exafctly the same +/- 1
             print("belt is potentially stuck, or factory has tried to sabotage me too much, initiating shutdown") #create an exitcode
@@ -99,19 +99,19 @@ def ultrasoundcheck(): #check if a shape which is sufficiently high to be recogn
 
 def colorCheck():
   color = ColorReading() #reads color in frequency, and depending on the thresholds, white, black, or something else
-  print(color)
-  print(binary[binary_index])
+  print(color) #Shows user the color of the disks to check it out, mostly for during the demo
+  #print(binary[binary_index])
   time.sleep(1)
   if (color == "black") and (binary[binary_index] == "0"): #if the disk is black and needed to display the current bit, get it
-    print("gotcha bitch")
+    print("Correct disk, commence retrieval")
     time.sleep(1)
     Arm()
   elif (color == "white") and (binary[binary_index] == "1"): #if the disk is black and needed to display the current bit, get it
-    print("gotcha bitch")
+    print("Correct disk, commence retrieval")
     time.sleep(5) #create a time buffer, as to not force the motor to be on for too long
     Arm() #call upon the arm function, which activates the windmill
   else:
-    print("oopsie poopsie") #message to the terminal, informs user that the disk was a wrong one
+    print("Not a useful disk, let is pass through, start the loop over") #message to the terminal, informs user that the disk was a wrong one
 
 
 def Arm(): #function to move the arm to retrieve the disk
@@ -122,14 +122,14 @@ def Arm(): #function to move the arm to retrieve the disk
 
   EN1.start(0)
   time.sleep(5) #waits for the disk to be underneath, because we don't want it to be on too long, as not to waste battery. For the straight belt, this is only 5 seconds
-  print ("FORWARD MOTION")
+  #print ("FORWARD MOTION")
   EN1.ChangeDutyCycle(30) #changes the speed of the motor, activating it
 
   GPIO.output(Motor1['input1'], GPIO.HIGH)
   GPIO.output(Motor1['input2'], GPIO.LOW)
   time.sleep(5) #keep the motor on for 5 seconds, to limit its time being on
 
-  print("Stop motors")
+  #print("Stop motors")
   EN1.ChangeDutyCycle(0) #turn the motor off
 
   NextNumber() #After moving the arm, we continue onto the next number
@@ -180,12 +180,12 @@ def Green(): #check frequency of green from the color sensor
 
     # if green>12000 and blue>12000 and red>12000:
 def ColorReading(): #gets the color data from the color sensor, each filtered for a primary color
-    print(White_Color)
-    print(Black_Color)
+    #print(White_Color)
+    #print(Black_Color)
     red = Red()
     blue = Blue()
     green = Green()
-    print(red + green + blue)
+    #print(red + green + blue)
     if green + blue + red >= White_Color: #threshold calibrated at the start for white
       return "white"
     #elif green <7000 and blue < 7000 and red < 7000: #threshold calibrated at the start for black
@@ -216,7 +216,7 @@ print(binary) #final binary encoding, to write down to check later
 
 exitcode = None
 binary_index = len(binary)-1 #number is represented from bottom to down on the ramp, so we start at the end of the encoding, for 2**0
-print(binary_index)
+#print(binary_index)
 time.sleep(1)
 start = time.time() #global value refreshed to start fault detection for the belt.
 
